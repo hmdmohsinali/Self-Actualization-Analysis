@@ -79,6 +79,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    hasCompletedAssessment: {
+      type: Boolean,
+      default: false,
+    },
+    assessmentCompletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

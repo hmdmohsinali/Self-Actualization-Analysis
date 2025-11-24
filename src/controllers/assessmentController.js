@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Question from "../models/Questions.js";
 import UserAssessment from "../models/UserAssessment.js";
+import User from "../models/User.js";
 import { asyncHandler } from "../middlewares/asyncHandler.js";
 import { AppError } from "../utils/errorHandler.js";
 import PDFDocument from "pdfkit";
@@ -100,6 +101,17 @@ export const submitAssessment = asyncHandler(async (req, res) => {
       { session }
     );
 
+    // Update user flag to indicate assessment completion
+    const completionDate = new Date();
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        hasCompletedAssessment: true,
+        assessmentCompletedAt: completionDate,
+      },
+      { session }
+    );
+
     await session.commitTransaction();
 
     res.status(200).json({
@@ -107,6 +119,7 @@ export const submitAssessment = asyncHandler(async (req, res) => {
       message: "Assessment submitted successfully",
       categoryScores,
       overallScore,
+      hasCompletedAssessment: true,
     });
   } catch (error) {
     await session.abortTransaction();
