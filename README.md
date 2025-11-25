@@ -14,6 +14,7 @@ A complete Node.js/Express backend API with user authentication, password reset 
 - ✅ Input Validation
 #done
 #done
+#done
 ## Tech Stack
 
 - **Node.js** with Express.js
