@@ -4,6 +4,7 @@ import UserAssessment from "../models/UserAssessment.js";
 import User from "../models/User.js";
 import { asyncHandler } from "../middlewares/asyncHandler.js";
 import { AppError } from "../utils/errorHandler.js";
+import { getCategoriesForSubscription, validateCategoriesForSubscription } from "../utils/subscription.js";
 import PDFDocument from "pdfkit";
 
 const VALID_SCORE_MIN = 1;
@@ -21,6 +22,16 @@ export const submitAssessment = asyncHandler(async (req, res) => {
   if (!Array.isArray(responses) || responses.length === 0) {
     throw new AppError("Responses are required", 400);
   }
+
+  // Get user's subscription to validate categories
+  const user = await User.findById(userId).select("currentSubscriptionType");
+  
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const subscriptionType = user.currentSubscriptionType || "Free";
+  const availableCategories = getCategoriesForSubscription(subscriptionType);
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -42,6 +53,15 @@ export const submitAssessment = asyncHandler(async (req, res) => {
       throw new AppError("No matching questions found for given IDs", 400);
     }
 
+    // Get all unique categories from questions
+    const questionCategories = [...new Set(questions.map((q) => q.category))];
+
+    // Validate categories against subscription
+    const validation = validateCategoriesForSubscription(questionCategories, subscriptionType);
+    if (!validation.isValid) {
+      throw new AppError(validation.message, 403);
+    }
+
     const categoryTotals = {};
     const categoryCounts = {};
     const validResponses = [];
@@ -50,6 +70,14 @@ export const submitAssessment = asyncHandler(async (req, res) => {
       const question = questions.find((q) => q._id.toString() === response.questionId);
       if (!question) {
         continue;
+      }
+
+      // Double-check: ensure question category is available for subscription (extra security)
+      if (!availableCategories.includes(question.category)) {
+        throw new AppError(
+          `Question from category "${question.category}" is not available in your ${subscriptionType} subscription.`,
+          403
+        );
       }
 
       const score = Number(response.selectedOption);

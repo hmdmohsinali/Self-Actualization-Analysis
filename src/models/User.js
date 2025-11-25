@@ -87,6 +87,12 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Current subscription info (denormalized for quick access)
+    currentSubscriptionType: {
+      type: String,
+      enum: ["Free", "Premium", "Coach"],
+      default: "Free",
+    },
   },
   {
     timestamps: true,

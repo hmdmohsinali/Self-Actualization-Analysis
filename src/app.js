@@ -6,6 +6,7 @@ import questionRoutes from "./routes/questionRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
 import reflectionRoutes from "./routes/reflectionRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import { errorHandler } from "./utils/errorHandler.js";
 
 dotenv.config();
@@ -81,6 +82,13 @@ app.get("/", (req, res) => {
         update: "PATCH /api/reflections/:id",
         delete: "DELETE /api/reflections/:id",
       },
+      subscriptions: {
+        create: "POST /api/subscriptions",
+        getCurrent: "GET /api/subscriptions/current",
+        updateCategories: "PATCH /api/subscriptions/categories",
+        getAvailableCategories: "GET /api/subscriptions/available-categories",
+        updateStatus: "PATCH /api/subscriptions/status",
+      },
     },
     timestamp: new Date().toISOString(),
   });
@@ -92,6 +100,7 @@ app.use("/api/questions", questionRoutes);
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/reflections", reflectionRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
