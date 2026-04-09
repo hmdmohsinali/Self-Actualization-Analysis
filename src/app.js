@@ -9,10 +9,10 @@ import reflectionRoutes from "./routes/reflectionRoutes.js";
 import { errorHandler } from "./utils/errorHandler.js";
 
 dotenv.config();
-
+//pipeline testing
 // Connect to database (non-blocking for serverless)
 connectDB().catch((err) => {
-  console.error("Database connection error:", err);
+  console.error("Database connection error:", err)
 });
 
 const app = express();
